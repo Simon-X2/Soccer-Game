@@ -3,6 +3,8 @@
 
 
 import pygame
+from random import randint
+from ball import Ball
 
 # ----- CONSTANTS
 BLACK = (0, 0, 0)
@@ -117,12 +119,12 @@ class goal:
     pass
 
 
-class ball:
-    pass
-
-
 def main():
     pygame.init()
+
+    ball = Ball(WHITE, 10, 10)
+    ball.rect.x = 345
+    ball.rect.y = 195
 
     # ----- SCREEN PROPERTIES
     size = (WIDTH, HEIGHT)
@@ -140,6 +142,8 @@ def main():
     # adding player to all sprite group
     player = Player()
     all_sprites.add(player)
+    ball = Ball()
+    all_sprites.add(ball)
 
     # ----- MAIN LOOP
     while not done:
@@ -164,6 +168,15 @@ def main():
 
         # ----- LOGIC
         all_sprites.update()
+
+        if ball.rect.x >= 690:
+            ball.velocity[0] = -ball.velocity[0]
+        if ball.rect.x <= 0:
+            ball.velocity[0] = -ball.velocity[0]
+        if ball.rect.y > 490:
+            ball.velocity[1] = -ball.velocity[1]
+        if ball.rect.y < 0:
+            ball.velocity[1] = -ball.velocity[1]
 
         # ----- DRAW
         screen.fill(BLACK)
