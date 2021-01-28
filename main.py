@@ -3,7 +3,7 @@
 
 
 import pygame
-
+import ball as Ball
 
 # ----- CONSTANTS
 BLACK = (0, 0, 0)
@@ -13,6 +13,8 @@ SKY_BLUE = (95, 165, 228)
 WIDTH = 1280
 HEIGHT = 720
 TITLE = "Soccer Madness"
+background_image = pygame.image.load("1337873.jpg")
+background_image = pygame.transform.scale(background_image, (1280, 720))
 
 '''class Ground(pygame.sprite.Sprite):
     """Represents the ground for the game"""
@@ -110,6 +112,52 @@ class Player(pygame.sprite.Sprite):
         self.vel_x = 0
 
 
+class Ball(pygame.sprite.Sprite):
+
+    def __init__(self):
+
+        super().__init__()
+
+        self.image = pygame.image.load("ball.png")
+        self.image = pygame.transform.scale(self.image, (128, 128))
+        self.rect = self.image.get_rect()
+
+        self.y_vel = 10
+        self.x_vel = 0
+
+    def update(self):
+
+        self.calc_gravity()
+        friction = 0.3
+        dampening = 0.88
+
+        self.rect.x += self.x_vel
+        self.rect.y += self.y_vel
+
+        if self.rect.bottomright[1] >= HEIGHT:
+            self.y_vel *= -dampening
+
+        if self.rect.topleft[1] <= 1:
+            self.y_vel *= -1
+
+        if self.rect.bottomright[0] >= WIDTH:
+            self.x_vel = -(self.x_vel * friction)
+        if self.rect.topleft[0] <= 1:
+            self.x_vel = -(self.x_vel * friction)
+
+    def calc_gravity(self):
+        if self.y_vel == 0:
+            self.y_vel = 1
+        else:
+            self.y_vel += 0.35
+
+    def collsion(self, player):
+        return self.rect.colliderect(player.rect)
+
+
+
+
+
 class Player2:
     pass
 
@@ -120,8 +168,6 @@ class goal:
 
 def main():
     pygame.init()
-
-    
 
     # ----- SCREEN PROPERTIES
     size = (WIDTH, HEIGHT)
@@ -135,10 +181,17 @@ def main():
     # Sprite groups
     all_sprites = pygame.sprite.Group()
     ground_sprites = pygame.sprite.Group()
+    ball_sprites = pygame.sprite.Group()
+    player_sprites = pygame.sprite.Group()
 
     # adding player to all sprite group
     player = Player()
     all_sprites.add(player)
+    player_sprites.add(player)
+    ball = Ball()
+    ball.rect.x = WIDTH/2
+    all_sprites.add(ball)
+    ball_sprites.add(ball)
 
 
     # ----- MAIN LOOP
@@ -165,10 +218,23 @@ def main():
         # ----- LOGIC
         all_sprites.update()
 
+        c_tol = 15
+        if ball.collsion(player):
+            print('collision!')
+
+            if abs(player.rect.top - ball.rect.bottom) < c_tol:
+                ball.y_vel *= -1.2
+            if abs(player.rect.bottom - ball.rect.top) < c_tol:
+                ball.y_vel *= -1.2
+            if abs(player.rect.right - ball.rect.left) < c_tol:
+                ball.x_vel *= -1.2
+            if abs(player.rect.left - ball.rect.right) < c_tol:
+                ball.x_vel *= -1.2
 
 
-        # ----- DRAW
+
         screen.fill(BLACK)
+        screen.blit(background_image, [0, 0])
         all_sprites.draw(screen)
 
         # ----- UPDATE
